@@ -6,19 +6,19 @@
 #include <vector>
 #include <ctime>
 #include <cstdlib>
-const int wallrow = 43;
-const int wallcolumn = 45; 
-class Snake;
-class Food
+const int wallrow = 43;     // windows lengh
+const int wallcolumn = 45;  // windows high
+class Snake;                
+class Food                  
 {
 public:
 	Food(Snake & snake);
-	bool m_exist;
-	COORD m_position;
+	bool m_exist;              
+	COORD m_position;           // food's position
 };
 class Snake
 {
-	friend class Food;
+	friend class Food;          
 public:
 	Snake();
 	void draw();
