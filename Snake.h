@@ -6,19 +6,30 @@
 #include <vector>
 #include <ctime>
 #include <cstdlib>
-const int wallrow = 43;     // windows lengh
-const int wallcolumn = 45;  // windows high
-class Snake;                
-class Food                  
+const int wallrow = 43;
+const int wallcolumn = 45; 
+enum direction{ up = 1, down, left, right };
+class Snake;
+class Food
 {
 public:
 	Food(Snake & snake);
-	bool m_exist;              
-	COORD m_position;           // food's position
+	bool m_exist;
+	COORD m_position;
+};
+class Wall
+{
+	friend class Food;
+public:
+	Wall();
+	void renew();
+	void show(Food **);
+private:
+	char wall[wallrow][wallcolumn];
 };
 class Snake
 {
-	friend class Food;          
+	friend class Food;
 public:
 	Snake();
 	void draw();
@@ -26,20 +37,15 @@ public:
 	bool checklive();
 	void move();
 	bool checkwall();
+	bool checkbody();
+	//void show(Wall & wall);
 private:
 	bool m_vertial;
 	bool m_live;
 	std::vector<COORD>m_body;
 	int m_length;
-	int m_scores;
+	int m_scores;	
+	int m_direction;
 };
-class Wall
-{
-public:
-	Wall();
-	void renew();
-	void show();
-private:
-	char wall[wallrow][wallcolumn];
-};
+
 #endif
