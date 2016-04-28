@@ -2,14 +2,17 @@
 #include <iostream>
 HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);
 CONSOLE_SCREEN_BUFFER_INFO info;
+COORD coord = { 0, 0 };
 Snake::Snake()
 {
 	m_vertial = 1;
 	m_live = 1;
 	m_length = 4;
 	m_scores = 0;
+	m_direction = up;
 	COORD pos;
 	int i = 0;
+
 	for (i = 0; i < 4; i++)
 	{
 		pos.X = 15;
@@ -46,49 +49,94 @@ bool Snake::checklive()
 }
 void Snake::move()
 {
-	if (KEYDOWN(VK_LEFT))
-	{
-		if (m_vertial)
-		{
-			m_body.begin()->X -= 1;
-			m_vertial = 0;
-		}
-	}
-	else if (KEYDOWN(VK_RIGHT))
-	{
-		if (m_vertial)
-		{
-			m_body.begin()->X += 1;
-			m_vertial = 0;
-
-		}
-	}
-	else if(KEYDOWN(VK_UP))
-	{
-		if (!m_vertial)
-		{
-			m_body.begin()->Y -= 1;
-			m_vertial = 1;
-		}
-	}
-	else if(KEYDOWN(VK_DOWN))
-	{
-		if (!m_vertial)
-		{
-			m_body.begin()->Y += 1;
-			m_vertial = 1;
-		}
-	}
-
-	for (auto beg = m_body.rbegin(); beg != m_body.rend()-1; beg++)
+	for (auto beg = m_body.rbegin(); beg != m_body.rend() - 1; beg++)
 	{
 		*beg = *(beg + 1);
+	}
+	while (1)
+	{
+		if (KEYDOWN(VK_LEFT))
+		{
+			if (m_vertial)
+			{
+				m_body.begin()->X -= 1;
+				m_vertial = 0;
+				m_direction = left;
+				break;
+			}
+		}
+		else if (KEYDOWN(VK_RIGHT))
+		{
+			if (m_vertial)
+			{
+				m_body.begin()->X += 1;
+				m_vertial = 0;
+				m_direction = right;
+				break;
+			}
+		}
+		else if (KEYDOWN(VK_UP))
+		{
+			if (!m_vertial)
+			{
+				m_body.begin()->Y -= 1;
+				m_vertial = 1;
+				m_direction = up;
+				break;
+			}
+		}
+		else if (KEYDOWN(VK_DOWN))
+		{
+			if (!m_vertial)
+			{
+				m_body.begin()->Y += 1;
+				m_vertial = 1;
+				m_direction = down;
+				break;
+			}
+		}
+		else
+		{
+			switch (m_direction)
+			{
+			case up:
+			{
+					  m_body.begin()->Y -= 1;
+					  m_vertial = 1;
+					  m_direction = up;
+					  break;
+			}
+			case down:
+			{
+					  m_body.begin()->Y += 1;
+					  m_vertial = 1;
+					  m_direction = down;
+					  break;
+			}
+			case left:
+			{
+					  m_body.begin()->X -= 1;
+					  m_vertial = 0;
+					  m_direction = left;
+					  break;
+			}
+			case right:
+			{
+					  m_body.begin()->X += 1;
+					  m_vertial = 0;
+					  m_direction = right;
+					  break;
+			}
+			}
+			break;
+		}
 	}
 }
 bool Snake::checkwall()
 {
 	if (m_body.begin()->X == 0 || m_body.begin()->X == 45 || m_body.begin()->Y == 0 || m_body.begin()->Y == 45)
 	{
+
 		return true;
 	}
 	else if (m_body.begin()->X == m_body.rbegin()->X && m_body.begin()->Y == m_body.rbegin()->Y)
@@ -103,18 +151,18 @@ bool Snake::checkwall()
 Food::Food(Snake & snake)
 {
 	GetConsoleScreenBufferInfo(handle, &info);
-	int posx = 10;
-	int posy = 10;
-		/*for (auto beg = snake.m_body.begin(); beg != snake.m_body.end(); beg++)
+	int posx;
+	int posy;
+		for (auto beg = snake.m_body.begin(); beg != snake.m_body.end(); beg++)
 		{
 			srand(time(0));
 			posx = rand() % 43 + 1;
 			posy = rand() % 43 + 1;
-			if (posx != beg->X && posy != beg->Y)
+			if (posx != beg->X && posy != beg->Y || beg->X == 0 || beg->X >= 44 || beg->Y >= 44 || beg->Y == 0)
 			{
 				break;
 			}
-		}*/
+		}
 		m_exist = 1;
 		m_position.X = posx;
 		m_position.Y = posy;
@@ -167,7 +215,7 @@ void Wall::renew()
 		}
 	}
 }
-void Wall::show()
+void Wall::show(Food ** food)
 {
 	COORD pos;
 	pos.X = 0;
@@ -184,5 +232,18 @@ void Wall::show()
 		
 		}
 	}
+	SetConsoleCursorPosition(handle, (*food)->m_position);
+	std::cout << '*';
+}
+bool Snake::checkbody()
+{
+	for (auto beg = m_body.cbegin(); beg != m_body.cend()-1; beg++)
+	{
+		if (beg->X == (beg + 1)->X && beg->Y == (beg+1)->Y)
+		{
+			return 1;
+		}
+	}
+	return 0;
 }
 
